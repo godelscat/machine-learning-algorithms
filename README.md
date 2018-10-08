@@ -3,7 +3,7 @@
 This is my note on *Statistical Learning Methods* by [Hang
 Li](http://www.hangli-hl.com/index.html). 
 
-Handwritten notes are in Chinese, but may be translated into English in the future. The algorithms are implented by `python` with `TensorFlow`. 
+Handwritten notes are in Chinese, but may be translated into English in the future. The algorithms are implented by `python` with plain `numpy`, and `pandas` to read data. 
 
 ### Reference
 
