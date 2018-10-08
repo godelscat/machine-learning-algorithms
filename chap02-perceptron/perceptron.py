@@ -19,22 +19,27 @@ def train_split(data, labels, train_ratio=0.3):
 	
 class Perceptron():
 
-	def __init__(self, eta=0.01, steps=100000):
+	def __init__(self, eta=0.00001):
 		self.learning_rate = eta 
-		self.steps = steps
 
 	def train(self, data, labels):
 		assert data[:,0].size == labels.size
 		nevents = labels.size
+		runtime = 100000
+		run = 0
 		# initialize w and b to 0
 		weight = np.zeros(data[0,:].size)
 		bias = 0
-		for x in range(self.steps):
+		while True:
 			idx = np.random.randint(0, nevents)
-			flag = labels[idx] * (np.dot(weight, data[idx,:]) + bias)
-			if flag <= 0 :
+			temp = labels[idx] * (np.dot(weight, data[idx,:]) + bias)
+			if temp <= 0 :
 				weight = weight + self.learning_rate * labels[idx] * data[idx, :]
 				bias = bias + self.learning_rate * labels[idx]	
+				run += 1
+			if run >= runtime:
+				print("up to max runtime")
+				break
 		return weight, bias
 
 	def predict(self, test, labels, weight, bias):
@@ -55,6 +60,7 @@ if __name__ == "__main__":
 	data = raw_data.iloc[:,1:].values
 	train_data, train_labels, test_data, test_labels = train_split(data,
 labels)
+	print(train_data.shape, test_data.shape)
 	model = Perceptron()
 	weight, bias = model.train(train_data, train_labels)
 	model.predict(test_data, test_labels, weight, bias)
