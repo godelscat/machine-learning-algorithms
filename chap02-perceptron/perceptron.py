@@ -40,6 +40,26 @@ class Perceptron():
 			if run >= runtime:
 				print("up to max runtime")
 				break
+
+		# for small dataset, we can check all the elements
+		'''
+		flag = True
+		flag2 = False
+		while flag:
+			rand_idx = np.arange(nevents)
+			np.random.shuffle(rand_idx)
+			for idx in rand_idx :
+				temp = ...
+				if temp <= 0:
+					...
+					...
+					flag2 = True
+					break
+			if flag2:
+				continue
+			flag = False
+
+		'''		
 		return weight, bias
 
 	def predict(self, test, labels, weight, bias):
@@ -58,8 +78,7 @@ if __name__ == "__main__":
 	raw_data = pd.read_csv("../dataset/MNIST/binary_train.csv")
 	labels = raw_data['label'].values
 	data = raw_data.iloc[:,1:].values
-	train_data, train_labels, test_data, test_labels = train_split(data,
-labels)
+	train_data, train_labels, test_data, test_labels = train_split(data, labels)
 	print(train_data.shape, test_data.shape)
 	model = Perceptron()
 	weight, bias = model.train(train_data, train_labels)
