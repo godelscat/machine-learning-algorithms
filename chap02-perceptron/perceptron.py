@@ -10,7 +10,7 @@ def train_split(data, labels, train_ratio=0.3):
 	np.random.shuffle(idx)
 	data = data[idx, :]	
 	labels = labels[idx]
-	train_split = int(nevents*(1-train_ratio))
+	train_split = int(nevents*(1-train_ratio)+1)
 	train_data = data[:train_split, :]
 	test_data = data[train_split:, :]
 	train_labels = labels[:train_split]
@@ -25,7 +25,7 @@ class Perceptron():
 	def train(self, data, labels):
 		assert data[:,0].size == labels.size
 		nevents = labels.size
-		runtime = 100000
+		runtime = 10000
 		run = 0
 		# initialize w and b to 0
 		weight = np.zeros(data[0,:].size)
