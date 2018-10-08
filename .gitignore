@@ -1,0 +1,13 @@
+#C++
+*.a
+*.out
+*.exe
+*.gch
+*.json
+
+#Python
+__pycache__/
+
+# IPython
+profile_default/
+ipython_config.py
