@@ -1,7 +1,7 @@
 ### Statistical Learning Methods
 
-This is my note on *Statistical Learning Methods* by [Hang
-Li](http://www.hangli-hl.com/index.html). 
+This is my note on *Statistical Learning Methods* [统计学习方法] by [Hang
+Li](http://www.hangli-hl.com/index.html)[李航]. 
 
 Handwritten notes are in Chinese, but may be translated into English in the future. The algorithms are implented by `python` with plain `numpy`, and `pandas` to read data. 
 
