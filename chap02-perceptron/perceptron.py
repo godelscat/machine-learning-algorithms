@@ -25,11 +25,12 @@ class Perceptron():
 	def train(self, data, labels):
 		assert data[:,0].size == labels.size
 		nevents = labels.size
-		runtime = 10000
-		run = 0
 		# initialize w and b to 0
 		weight = np.zeros(data[0,:].size)
 		bias = 0
+
+		runtime = 10000
+		run = 0
 		while True:
 			idx = np.random.randint(0, nevents)
 			temp = labels[idx] * (np.dot(weight, data[idx,:]) + bias)
@@ -42,24 +43,25 @@ class Perceptron():
 				break
 
 		# for small dataset, we can check all the elements
-		'''
+		"""
 		flag = True
 		flag2 = False
 		while flag:
 			rand_idx = np.arange(nevents)
 			np.random.shuffle(rand_idx)
 			for idx in rand_idx :
-				temp = ...
+				temp = labels[idx] * (np.dot(weight, data[idx,:]) + bias)
 				if temp <= 0:
-					...
-					...
+					weight = weight + self.learning_rate * labels[idx] * data[idx, :]
+					bias = bias + self.learning_rate * labels[idx]	
 					flag2 = True
 					break
+				flag2 = False
 			if flag2:
 				continue
 			flag = False
+		"""
 
-		'''		
 		return weight, bias
 
 	def predict(self, test, labels, weight, bias):
