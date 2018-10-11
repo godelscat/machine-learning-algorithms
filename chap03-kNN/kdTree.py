@@ -35,7 +35,7 @@ class KDTree():
 
 		if train.shape[0] == 1:
 			root_node.data = train.flatten()
-			root_node.label = labels
+			root_node.label = labels[0]
 			return 
 
 		j = root_node.depth
@@ -72,7 +72,7 @@ class KDTree():
 	def _preorder(self, root_node):
 		if root_node != None:
 			print("data: {}".format(root_node.data))
-		#	print("labels: {}".format(root_node.label))
+			print("labels: {}".format(root_node.label))
 			self._preorder(root_node.left)
 			self._preorder(root_node.right)	
 	
