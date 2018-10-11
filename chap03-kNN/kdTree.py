@@ -1,5 +1,6 @@
 # this K-D Tree is speciallized for KNN search, so we have labels
-# But you can change it into normal K-D data structure
+# w/o delte, insert, update 
+# But you can easily change it into normal K-D data structure
 # reference for kNN search : https://zhuanlan.zhihu.com/p/23966698
 
 import numpy as np
@@ -33,7 +34,7 @@ class KDTree():
 		assert train[:,0].size == labels.size
 
 		if train.shape[0] == 1:
-			root_node.data = train
+			root_node.data = train.flatten()
 			root_node.label = labels
 			return 
 
@@ -68,15 +69,15 @@ class KDTree():
 		self._split(data, labels, self.root)
 
 	
-	def _inorder(self, root_node):
+	def _preorder(self, root_node):
 		if root_node != None:
 			print("data: {}".format(root_node.data))
 		#	print("labels: {}".format(root_node.label))
-			self._inorder(root_node.left)
-			self._inorder(root_node.right)	
+			self._preorder(root_node.left)
+			self._preorder(root_node.right)	
 	
 	def show(self):
-		self._inorder(self.root)
+		self._preorder(self.root)
 
 if __name__ == "__main__":
 	
