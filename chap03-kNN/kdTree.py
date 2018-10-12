@@ -4,6 +4,7 @@
 # reference for kNN search : https://zhuanlan.zhihu.com/p/23966698
 
 import numpy as np
+import numpy.linalg as LA
 
 class Node():
 	def __init__(self):
@@ -72,17 +73,113 @@ class KDTree():
 	def _preorder(self, root_node):
 		if root_node != None:
 			print("data: {}".format(root_node.data))
-			print("labels: {}".format(root_node.label))
+		#	print("labels: {}".format(root_node.label))
 			self._preorder(root_node.left)
 			self._preorder(root_node.right)	
 	
 	def show(self):
 		self._preorder(self.root)
 
+	def _find_bottom(self, X, root_node):
+		temp = root_node
+		dim = X.size
+		while temp != None:
+			p = temp
+			i = temp.depth % dim 
+			if X[i] < temp.data[i]:
+				temp = temp.left
+			else:
+				temp = temp.right
+		return p
+
+	# k_list is a list of Node, possible KNN of X
+	def _max_dist(self, X, k_list, k=5):
+		if len(k_list) == 0:
+			raise ValueError('Empty List')
+		if len(k_list) > k:
+			raise ValueError('too many elements in list')
+		temp = 0
+		idx = 0
+		for i in range(len(k_list)):
+			dist = LA.norm(X - k_list[i].data) 
+			if dist > temp:
+				temp = dist
+				idx = i
+		return idx, temp
+				
+	def _add_node(self, X, current_node, k_list, search_list, k=5):
+		#current_node = bottom_node
+		assert current_node not in search_list
+		search_list.append(current_node)
+		if len(k_list) < k:
+			k_list.append(current_node)
+		else:
+			idx, max_d = self._max_dist(X, k_list, k)
+			if LA.norm(X - current_node.data) < max_d:
+				k_list[idx] = current_node	
+		
+				
+	def _bottom_to_up(self, X, bottom_node, k_list, search_list, k=5):
+		current_node = bottom_node.parent
+		if current_node not in search_list:
+			self._add_node(X, current_node, k_list, search_list, k)
+			flag1 = 0
+			flag2 = 0
+			if (bottom_node == current_node.left) and (current_node.right != None):
+				flag1 = 1
+			elif (bottom_node == current_node.right) and (current_node.left != None):
+				flag2 = 1
+			else:
+				if current_node != self.root:
+					self._bottom_to_up(X, current_node, k_list, search_list, k)
+				else:
+					return
+			i = current_node.depth % X.size 
+			ax_dist = abs(current_node.data[i] - X[i])
+			_, max_d = self._max_dist(X, k_list, k)
+			if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
+				if flag1: 
+					b_node = self._find_bottom(X, current_node.right)
+				else :
+					b_node = self._find_bottom(X, current_node.left)
+				self._add_node(X, b_node, k_list, search_list, k)
+				if b_node != self.root:
+					self._bottom_to_up(X, b_node, k_list, search_list, k)
+				else:
+					return
+			else:
+				if current_node != self.root:
+					self._bottom_to_up(X, current_node, k_list, search_list, k)
+				else:
+					return
+		else:
+			if current_node != self.root:
+				self._bottom_to_up(X, current_node, k_list, search_list, k)
+			else:
+				return
+
+
+	def kNN_points(self, X, k=5):
+		search_list = []
+		k_list = []
+		current_node = self._find_bottom(X, self.root)
+		self._add_node(X, current_node, k_list, search_list, k)
+		if current_node != None:
+			self._bottom_to_up(X, current_node, k_list, search_list, k)
+		return k_list
+
 if __name__ == "__main__":
 	
-	test_data = np.array([[2,3], [5,4], [9,6], [4,7], [8,1], [7,2]])	
-	test_labels = np.zeros(6)	
+	test_data = np.array([[6.27, 5.50], [1.24, -2.86], [17.05, -12.79], [-6.88, -5.40],
+				[-2.96, -0.50], [7.75, -22.68], [10.80, -5.03], [-4.60, -10.55], 
+				[-4.96, 12.61], [1.75, 12.26], [15.31, -13.16], [7.83, 15.70], 
+				[14.63, -0.35]])	
+
+	test_labels = np.zeros(13)
 	test_kdT = KDTree()
 	test_kdT.build(test_data, test_labels)
 	test_kdT.show()
+	test = np.array([-1, -5])
+	knn = test_kdT.kNN_points(test, k=3)
+	for k in knn:
+		print(k.data)
