@@ -128,6 +128,7 @@ class KDTree():
 		current_node = bottom_node
 		add_node_idx = 0
 		while current_node != root_node:
+			temp_node = current_node
 			current_node = current_node.parent
 			if current_node in search_list:
 				continue
@@ -135,9 +136,9 @@ class KDTree():
 				self._add_node(X, current_node, k_list, search_list, k)
 				flag1 = 0
 				flag2 = 0
-				if (bottom_node == current_node.left) and (current_node.right != None):
+				if (temp_node == current_node.left) and (current_node.right != None):
 					flag1 = 1
-				elif (bottom_node == current_node.right) and (current_node.left != None):
+				elif (temp_node == current_node.right) and (current_node.left != None):
 					flag2 = 1
 				else:
 					continue
@@ -154,43 +155,18 @@ class KDTree():
 					add_node_idx += 1
 				else:
 					continue
-
+		
+		if  current_node not in search_list:
+			self._add_node(X, current_node, k_list, search_list, k)
 
 
 	def kNN_points(self, X, k=5):
 		search_list = []
 		k_list = []
 		waiting_node_queue = deque([])
+		
+		self._bottom_to_up(X, self.root, k_list, search_list, waiting_node_queue, k)
 
-		bottom_node = self._find_bottom(X, self.root)
-		self._add_node(X, bottom_node, k_list, search_list, k)
-		current_node = bottom_node
-		while current_node != self.root:
-			current_node = current_node.parent
-			if current_node in search_list:
-				continue
-			else:
-				self._add_node(X, current_node, k_list, search_list, k)
-				flag1 = 0
-				flag2 = 0
-				if (bottom_node == current_node.left) and (current_node.right != None):
-					flag1 = 1
-				elif (bottom_node == current_node.right) and (current_node.left != None):
-					flag2 = 1
-				else:
-					continue
-
-				i = current_node.depth % X.size 
-				ax_dist = abs(current_node.data[i] - X[i])
-				_, max_d = self._max_dist(X, k_list, k)
-				
-				if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-					if flag1: 
-						waiting_node_queue.append(current_node.right)
-					else :
-						waiting_node_queue.append(current_node.left)
-				else:
-					continue
 		flag = False
 		if len(waiting_node_queue) > 0:
 			flag = True

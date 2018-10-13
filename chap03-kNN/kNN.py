@@ -5,13 +5,13 @@ import sys
 sys.path.append('../chap02-perceptron/')
 
 from perceptron import train_split
-from kdTree import Node, KDTree
+from kdTree import KDTree
 
-sys.setrecursionlimit(10**6)
+#sys.setrecursionlimit(10**6)
 
 class KNN():
 	
-	def __init__(self, k=3):
+	def __init__(self, k=5):
 		self.k = k
 		self.tree = KDTree()
 	
@@ -47,8 +47,8 @@ if __name__ == "__main__":
 	train_data, train_labels, test_data, test_labels = train_split(data, labels)
 
 	# due to python recursion limit, I have to cut down # of train and test data
-	model = KNN()
-	model.train(train_data[:10000], train_labels[:10000])
-	model.predict(test_data[:1000], test_labels[:1000])
+	model = KNN(k=10)
+	model.train(train_data, train_labels)
+	model.predict(test_data, test_labels)
 	# final accuracy is around 95% 
 	# cost about 17min in my computer
