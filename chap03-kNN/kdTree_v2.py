@@ -2,11 +2,9 @@
 # w/o delte, insert, update 
 # But you can easily change it into normal K-D data structure
 # reference for kNN search : https://zhuanlan.zhihu.com/p/23966698
-# optimize code for python, as python does not support recursion well
 
 import numpy as np
 import numpy.linalg as LA
-from collections import deque
 
 class Node():
 	def __init__(self):
@@ -121,88 +119,54 @@ class KDTree():
 				k_list[idx] = current_node	
 		
 				
-	
-	def _bottom_to_up(self, X, root_node, k_list, search_list, waiting_node_queue, k=5):
-		bottom_node = self._find_bottom(X, root_node)
-		self._add_node(X, bottom_node, k_list, search_list, k)
-		current_node = bottom_node
-		add_node_idx = 0
-		while current_node != root_node:
-			current_node = current_node.parent
-			if current_node in search_list:
-				continue
+	def _bottom_to_up(self, X, bottom_node, k_list, search_list, k=5):
+		current_node = bottom_node.parent
+		if current_node not in search_list:
+			self._add_node(X, current_node, k_list, search_list, k)
+			flag1 = 0
+			flag2 = 0
+			if (bottom_node == current_node.left) and (current_node.right != None):
+				flag1 = 1
+			elif (bottom_node == current_node.right) and (current_node.left != None):
+				flag2 = 1
 			else:
-				self._add_node(X, current_node, k_list, search_list, k)
-				flag1 = 0
-				flag2 = 0
-				if (bottom_node == current_node.left) and (current_node.right != None):
-					flag1 = 1
-				elif (bottom_node == current_node.right) and (current_node.left != None):
-					flag2 = 1
+				if current_node != self.root:
+					self._bottom_to_up(X, current_node, k_list, search_list, k)
 				else:
-					continue
-
-				i = current_node.depth % X.size 
-				ax_dist = abs(current_node.data[i] - X[i])
-				_, max_d = self._max_dist(X, k_list, k)
-				
-				if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-					if flag1: 
-						waiting_node_queue.insert(add_node_idx, current_node.right)
-					else :
-						waiting_node_queue.insert(add_node_idx, current_node.left)
-					add_node_idx += 1
+					return
+			i = current_node.depth % X.size 
+			ax_dist = abs(current_node.data[i] - X[i])
+			_, max_d = self._max_dist(X, k_list, k)
+			if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
+				if flag1: 
+					b_node = self._find_bottom(X, current_node.right)
+				else :
+					b_node = self._find_bottom(X, current_node.left)
+				self._add_node(X, b_node, k_list, search_list, k)
+				if b_node != self.root:
+					self._bottom_to_up(X, b_node, k_list, search_list, k)
 				else:
-					continue
-
+					return
+			else:
+				if current_node != self.root:
+					self._bottom_to_up(X, current_node, k_list, search_list, k)
+				else:
+					return
+		else:
+			if current_node != self.root:
+				self._bottom_to_up(X, current_node, k_list, search_list, k)
+			else:
+				return
 
 
 	def kNN_points(self, X, k=5):
 		search_list = []
 		k_list = []
-		waiting_node_queue = deque([])
-
-		bottom_node = self._find_bottom(X, self.root)
-		self._add_node(X, bottom_node, k_list, search_list, k)
-		current_node = bottom_node
-		while current_node != self.root:
-			current_node = current_node.parent
-			if current_node in search_list:
-				continue
-			else:
-				self._add_node(X, current_node, k_list, search_list, k)
-				flag1 = 0
-				flag2 = 0
-				if (bottom_node == current_node.left) and (current_node.right != None):
-					flag1 = 1
-				elif (bottom_node == current_node.right) and (current_node.left != None):
-					flag2 = 1
-				else:
-					continue
-
-				i = current_node.depth % X.size 
-				ax_dist = abs(current_node.data[i] - X[i])
-				_, max_d = self._max_dist(X, k_list, k)
-				
-				if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-					if flag1: 
-						waiting_node_queue.append(current_node.right)
-					else :
-						waiting_node_queue.append(current_node.left)
-				else:
-					continue
-		flag = False
-		if len(waiting_node_queue) > 0:
-			flag = True
-
-		while flag:
-			n = waiting_node_queue.popleft()
-			self._bottom_to_up(X, n, k_list, search_list, waiting_node_queue, k)
-			if len(waiting_node_queue) == 0:
-				flag = False
-				
+		current_node = self._find_bottom(X, self.root)
+		self._add_node(X, current_node, k_list, search_list, k)
+		if current_node != None:
+			self._bottom_to_up(X, current_node, k_list, search_list, k)
 		return k_list
-							
 
 if __name__ == "__main__":
 	
