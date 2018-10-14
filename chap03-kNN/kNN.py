@@ -35,8 +35,7 @@ class KNN():
 			la = self._max_label(k_list)
 			if la == labels[i]:
 				counts += 1
-				if counts % 1000 == 0 :
-					print(counts)
+				print(counts)
 		accuracy = format(counts/nevents, '.5f')
 		print("kNN Model accuracy is : {}".format(accuracy))
 

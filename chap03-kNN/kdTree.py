@@ -6,7 +6,6 @@
 
 import numpy as np
 import numpy.linalg as LA
-from collections import deque
 
 class Node():
 	def __init__(self):
@@ -21,6 +20,7 @@ class KDTree():
 	
 	def __init__(self):
 		self.root = Node()	
+		self.nevents = 0
 	
 	def _split(self, train, labels, root_node):
 
@@ -70,6 +70,7 @@ class KDTree():
 
 	def build(self, data, labels):
 		self._split(data, labels, self.root)
+		self.nevents = labels.size
 
 	
 	def _preorder(self, root_node):
@@ -96,10 +97,6 @@ class KDTree():
 
 	# k_list is a list of Node, possible KNN of X
 	def _max_dist(self, X, k_list, k=5):
-		if len(k_list) == 0:
-			return 0, 0	
-		if len(k_list) > k:
-			raise ValueError('too many elements in list')
 		temp = 0
 		idx = 0
 		for i in range(len(k_list)):
@@ -122,23 +119,13 @@ class KDTree():
 		
 				
 	
-	def _bottom_to_up(self, X, root_node_flag, k_list, search_list, waiting_node_queue, k=5):
+	def _bottom_to_up(self, X, root_node, k_list, search_list, k=5):
 		
-		# store all possible dividing nodes in waiting_node_queue
-		temp_node = root_node_flag[0]
-		i = temp_node.depth % X.size 
-		ax_dist = abs(temp_node.data[i] - X[i])
-		_, max_d = self._max_dist(X, k_list, k)
-		if ((len(k_list) < k) or (ax_dist < max_d)):
-			if root_node_flag[1]:
-				root_node = root_node_flag[0].right
-			else:		
-				root_node = root_node_flag[0].left
-			bottom_node = self._find_bottom(X, root_node)
-			self._add_node(X, bottom_node, k_list, search_list, k)
-			current_node = bottom_node
-			add_node_idx = 0
-			while current_node != root_node:
+		bottom_node = self._find_bottom(X, root_node)
+		self._add_node(X, bottom_node, k_list, search_list, k)
+		current_node = bottom_node
+		for i in range(self.nevents):
+			if current_node != self.root:
 				temp_node = current_node
 				current_node = current_node.parent
 				if current_node in search_list:
@@ -159,43 +146,28 @@ class KDTree():
 					_, max_d = self._max_dist(X, k_list, k)
 					
 					if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-					# use flag1 to store information of child node to check
 						if flag1: 
-							waiting_node_queue.insert(add_node_idx, (current_node, True))
+							return current_node.right
 						else :
-							waiting_node_queue.insert(add_node_idx, (current_node, False))
-						add_node_idx += 1
+							return current_node.left
 					else:
 						continue
-		else:	
-			return
-		
+			else:
+				return current_node	
 
 
 	def kNN_points(self, X, k=5):
 		search_list = []
 		k_list = []
-		waiting_node_queue = deque([])
-		
-		temp = self.root 
-		dim = X.size
-		i = temp.depth % dim 
-		if X[i] < temp.data[i]:
-			flag1 = False	
-		else:
-			flag1 = True	
-		self._bottom_to_up(X, (self.root, flag1), k_list, search_list, waiting_node_queue, k)
 
-		flag = False
-		if len(waiting_node_queue) > 0:
-			flag = True
+		current_node = self._bottom_to_up(X, self.root, k_list, search_list, k)
 
-		while flag:
-			n_flag = waiting_node_queue.popleft()
-			self._bottom_to_up(X, n_flag, k_list, search_list, waiting_node_queue, k)
-			if len(waiting_node_queue) == 0:
-				flag = False
-				
+		for i in range(self.nevents):	
+			if current_node != self.root:
+				current_node = self._bottom_to_up(X, current_node, k_list, search_list, k)
+			else:
+				break
+
 		return k_list
 							
 
