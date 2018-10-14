@@ -54,7 +54,7 @@ if __name__ == "__main__":
 	print("start training")
 	model.train(train_data, train_labels)
 	print("start predicting")
-	model.predict(test_data[:100], test_labels[:100])
+	model.predict(test_data, test_labels)
 	print("predicting ends")
 	# final accuracy is around 95% 
 	# cost about 17min in my computer
