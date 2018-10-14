@@ -35,7 +35,9 @@ class KNN():
 			la = self._max_label(k_list)
 			if la == labels[i]:
 				counts += 1
-		accuracy =	format(counts/nevents, '.5f')
+				if counts % 1000 == 0 :
+					print(counts)
+		accuracy = format(counts/nevents, '.5f')
 		print("kNN Model accuracy is : {}".format(accuracy))
 
 
@@ -47,8 +49,12 @@ if __name__ == "__main__":
 	train_data, train_labels, test_data, test_labels = train_split(data, labels)
 
 	# due to python recursion limit, I have to cut down # of train and test data
+	print("start building model")
 	model = KNN(k=10)
+	print("start training")
 	model.train(train_data, train_labels)
-	model.predict(test_data, test_labels)
+	print("start predicting")
+	model.predict(test_data[:100], test_labels[:100])
+	print("predicting ends")
 	# final accuracy is around 95% 
 	# cost about 17min in my computer

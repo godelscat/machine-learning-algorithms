@@ -97,7 +97,7 @@ class KDTree():
 	# k_list is a list of Node, possible KNN of X
 	def _max_dist(self, X, k_list, k=5):
 		if len(k_list) == 0:
-			raise ValueError('Empty List')
+			return 0, 0	
 		if len(k_list) > k:
 			raise ValueError('too many elements in list')
 		temp = 0
@@ -122,42 +122,54 @@ class KDTree():
 		
 				
 	
-	def _bottom_to_up(self, X, root_node, k_list, search_list, waiting_node_queue, k=5):
-		bottom_node = self._find_bottom(X, root_node)
-		self._add_node(X, bottom_node, k_list, search_list, k)
-		current_node = bottom_node
-		add_node_idx = 0
-		while current_node != root_node:
-			temp_node = current_node
-			current_node = current_node.parent
-			if current_node in search_list:
-				continue
-			else:
-				self._add_node(X, current_node, k_list, search_list, k)
-				flag1 = 0
-				flag2 = 0
-				if (temp_node == current_node.left) and (current_node.right != None):
-					flag1 = 1
-				elif (temp_node == current_node.right) and (current_node.left != None):
-					flag2 = 1
-				else:
-					continue
-
-				i = current_node.depth % X.size 
-				ax_dist = abs(current_node.data[i] - X[i])
-				_, max_d = self._max_dist(X, k_list, k)
-				
-				if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-					if flag1: 
-						waiting_node_queue.insert(add_node_idx, current_node.right)
-					else :
-						waiting_node_queue.insert(add_node_idx, current_node.left)
-					add_node_idx += 1
-				else:
-					continue
+	def _bottom_to_up(self, X, root_node_flag, k_list, search_list, waiting_node_queue, k=5):
 		
-		if  current_node not in search_list:
-			self._add_node(X, current_node, k_list, search_list, k)
+		# store all possible dividing nodes in waiting_node_queue
+		temp_node = root_node_flag[0]
+		i = temp_node.depth % X.size 
+		ax_dist = abs(temp_node.data[i] - X[i])
+		_, max_d = self._max_dist(X, k_list, k)
+		if ((len(k_list) < k) or (ax_dist < max_d)):
+			if root_node_flag[1]:
+				root_node = root_node_flag[0].right
+			else:		
+				root_node = root_node_flag[0].left
+			bottom_node = self._find_bottom(X, root_node)
+			self._add_node(X, bottom_node, k_list, search_list, k)
+			current_node = bottom_node
+			add_node_idx = 0
+			while current_node != root_node:
+				temp_node = current_node
+				current_node = current_node.parent
+				if current_node in search_list:
+					continue
+				else:
+					self._add_node(X, current_node, k_list, search_list, k)
+					flag1 = 0
+					flag2 = 0
+					if (temp_node == current_node.left) and (current_node.right != None):
+						flag1 = 1
+					elif (temp_node == current_node.right) and (current_node.left != None):
+						flag2 = 1
+					else:
+						continue
+
+					i = current_node.depth % X.size 
+					ax_dist = abs(current_node.data[i] - X[i])
+					_, max_d = self._max_dist(X, k_list, k)
+					
+					if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
+					# use flag1 to store information of child node to check
+						if flag1: 
+							waiting_node_queue.insert(add_node_idx, (current_node, True))
+						else :
+							waiting_node_queue.insert(add_node_idx, (current_node, False))
+						add_node_idx += 1
+					else:
+						continue
+		else:	
+			return
+		
 
 
 	def kNN_points(self, X, k=5):
@@ -165,15 +177,22 @@ class KDTree():
 		k_list = []
 		waiting_node_queue = deque([])
 		
-		self._bottom_to_up(X, self.root, k_list, search_list, waiting_node_queue, k)
+		temp = self.root 
+		dim = X.size
+		i = temp.depth % dim 
+		if X[i] < temp.data[i]:
+			flag1 = False	
+		else:
+			flag1 = True	
+		self._bottom_to_up(X, (self.root, flag1), k_list, search_list, waiting_node_queue, k)
 
 		flag = False
 		if len(waiting_node_queue) > 0:
 			flag = True
 
 		while flag:
-			n = waiting_node_queue.popleft()
-			self._bottom_to_up(X, n, k_list, search_list, waiting_node_queue, k)
+			n_flag = waiting_node_queue.popleft()
+			self._bottom_to_up(X, n_flag, k_list, search_list, waiting_node_queue, k)
 			if len(waiting_node_queue) == 0:
 				flag = False
 				
