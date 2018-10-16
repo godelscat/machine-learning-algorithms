@@ -25,22 +25,22 @@ class NaiveBayes():
     def train(self, data, labels):
         nsamples = data[:,0].size
         ndim = data[0,:].size
-        marg_pr = np.zeros(self.ny) 
-        cond_pr = np.zeros((self.nx, ndim, self.ny)) 
+        self.marg_pr = np.zeros(self.ny) 
+        self.cond_pr = np.zeros((self.nx, ndim, self.ny)) 
         
         for i in range(nsamples):
-            marg_pr[labels[i]] += 1
-        marg_pr = (marg_pr  + self.lam) / (nsamples + self.ny * self.lam)
+            self.marg_pr[labels[i]] += 1
+        self.marg_pr = (self.marg_pr  + self.lam) / (nsamples + self.ny * self.lam)
 
         for i in range(nsamples):
             img = binarization(data[i,:])
             for j in range(ndim):
-                cond_pr[img[j], j, labels[i]] += 1
+                self.cond_pr[img[j], j, labels[i]] += 1
 
-        cond_pr = cond_pr + self.lam
+        self.cond_pr = self.cond_pr + self.lam
         
         for i in range(self.ny):
-            cond_pr[:,:,i] = cond_pr[:,:,i] / (nsamples * marg_pr[i] + self.nx * self.lam)
+            self.cond_pr[:,:,i] = self.cond_pr[:,:,i] / (nsamples * self.marg_pr[i] + self.nx * self.lam)
 
     def predict(self, test, labels):
         nsamples = labels.size
@@ -57,7 +57,7 @@ class NaiveBayes():
             if p_label == labels[i]:
                 counts += 1
 
-        accuracy = format(accuracy / nsamples, '.5f')
+        accuracy = format(counts / nsamples, '.5f')
         print("Model accuracy is : {}".format(accuracy))
 
 
