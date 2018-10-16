@@ -47,9 +47,7 @@ if __name__ == "__main__":
     data = raw_data.iloc[:,1:].values
     train_data, train_labels, test_data, test_labels = train_split(data, labels)
 
-    # due to python recursion limit, I have to cut down # of train and test data
     print("start building model")
-    print("Hello")
     model = KNN(k=10)
     print("start training")
     model.train(train_data, train_labels)
@@ -57,4 +55,5 @@ if __name__ == "__main__":
     model.predict(test_data, test_labels)
     print("predicting ends")
     # final accuracy is around 95% 
-    # cost about 17min in my computer
+    # But why is this kd-tree so slow
+    # Even slower than naive search O(N^2)
