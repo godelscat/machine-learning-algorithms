@@ -107,8 +107,8 @@ class KDTree():
 		return idx, temp
 				
 	def _add_node(self, X, current_node, k_list, search_list, k=5):
-		#current_node = bottom_node
-		assert current_node not in search_list
+		# current_node = bottom_node
+		# assert current_node not in search_list
 		search_list.append(current_node)
 		if len(k_list) < k:
 			k_list.append(current_node)
@@ -124,36 +124,34 @@ class KDTree():
 		bottom_node = self._find_bottom(X, root_node)
 		self._add_node(X, bottom_node, k_list, search_list, k)
 		current_node = bottom_node
-		for i in range(self.nevents):
-			if current_node != self.root:
-				temp_node = current_node
-				current_node = current_node.parent
-				if current_node in search_list:
-					continue
-				else:
-					self._add_node(X, current_node, k_list, search_list, k)
-					flag1 = 0
-					flag2 = 0
-					if (temp_node == current_node.left) and (current_node.right != None):
-						flag1 = 1
-					elif (temp_node == current_node.right) and (current_node.left != None):
-						flag2 = 1
-					else:
-						continue
-
-					i = current_node.depth % X.size 
-					ax_dist = abs(current_node.data[i] - X[i])
-					_, max_d = self._max_dist(X, k_list, k)
-					
-					if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
-						if flag1: 
-							return current_node.right
-						else :
-							return current_node.left
-					else:
-						continue
+		while current_node != self.root:
+			temp_node = current_node
+			current_node = current_node.parent
+			if current_node in search_list:
+				continue
 			else:
-				return current_node	
+				self._add_node(X, current_node, k_list, search_list, k)
+				flag1 = 0
+				flag2 = 0
+				if (temp_node == current_node.left) and (current_node.right != None):
+					flag1 = 1
+				elif (temp_node == current_node.right) and (current_node.left != None):
+					flag2 = 1
+				else:
+					continue
+
+				i = current_node.depth % X.size 
+				ax_dist = abs(current_node.data[i] - X[i])
+				_, max_d = self._max_dist(X, k_list, k)
+				
+				if ((ax_dist < max_d) or (len(k_list) < k)) and (flag1 or flag2):
+					if flag1: 
+						return current_node.right
+					else :
+						return current_node.left
+				else:
+					continue
+		return current_node	
 
 
 	def kNN_points(self, X, k=5):
@@ -162,11 +160,8 @@ class KDTree():
 
 		current_node = self._bottom_to_up(X, self.root, k_list, search_list, k)
 
-		for i in range(self.nevents):	
-			if current_node != self.root:
-				current_node = self._bottom_to_up(X, current_node, k_list, search_list, k)
-			else:
-				break
+		while current_node != self.root:
+			current_node = self._bottom_to_up(X, current_node, k_list, search_list, k)
 
 		return k_list
 							
