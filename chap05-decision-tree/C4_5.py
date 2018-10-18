@@ -1,4 +1,5 @@
-# Here we use ID3/C4.5 algorithm with pruning
+# Here we use ID3/C4.5 algorithm w/o pruning
+# need to add pruning in the future
 
 import numpy as np
 import pandas as pd
@@ -32,7 +33,7 @@ class DTree():
     def __init__(self, epsilon=0.3):
         self.root = Node()
         self.epsilon = epsilon
-        self.leaf = [] # collections of leaf nodes
+       # self.leaf = [] # collections of leaf nodes
 
     # empirical entropy H(D)
     def _emp_entropy(self, labels):
@@ -104,12 +105,12 @@ class DTree():
         label_val = list(set(labels))
         if len(label_val) == 1: 
             root_node.label = label_val[0]
-            self.leaf.append(root_node)
+          #  self.leaf.append(root_node)
             return 
             
         if not axises:
             root_node.label = self._max_label(labels)
-            self.leaf.append(root_node)
+          #  self.leaf.append(root_node)
             return 
 
         info_gain_list = []
@@ -119,7 +120,7 @@ class DTree():
         
         if max(info_gain_list) < self.epsilon:
             root_node.label = self._max_label(labels)
-            self.leaf.append(root_node)
+          #  self.leaf.append(root_node)
             return
         
         idx = info_gain_list.index(max(info_gain_list))
@@ -143,8 +144,8 @@ class DTree():
         ndim = data.shape[1]
         axises = list(range(ndim))
         self._build(self.root, data, labels, axises)
-        leaf_num = len(self.leaf)
-        print("number of leaf is :{}".format(leaf_num))
+       # leaf_num = len(self.leaf)
+       # print("number of leaf is :{}".format(leaf_num))
 
     def predict(self, test, labels):
         counts = 0
@@ -154,7 +155,6 @@ class DTree():
             while temp_node.children:
                 ax = temp_node.ax
                 val = test[i,ax] 
-                assert val in temp_node.children
                 temp_node = temp_node.children[val]
             if temp_node.label == labels[i]:
                 counts += 1
