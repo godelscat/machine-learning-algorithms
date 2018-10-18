@@ -29,7 +29,7 @@ class Node():
 
 class DTree():
 
-    def __init__(self, epsilon=0.1):
+    def __init__(self, epsilon=0.3):
         self.root = Node()
         self.epsilon = epsilon
         self.leaf = [] # collections of leaf nodes
@@ -57,6 +57,7 @@ class DTree():
         for i in ax_val:
             d_times.append(ax_data[ax_data == i].size)
         d_times = np.array(d_times) 
+
         d_ent = []
         for i in ax_val:
             idx = np.argwhere(ax_data == i).flatten()
@@ -85,6 +86,7 @@ class DTree():
     def _info_gain_ratio(self, ax, data, labels):
         hd = self._emp_entropy(labels)
         had, hda = self._cond_entropy(ax, data, labels)
+        # H_A(D) could be zero
         assert had != 0
         info = (hd - hda) / had
         return info
@@ -110,17 +112,17 @@ class DTree():
             self.leaf.append(root_node)
             return 
 
-        info_gain_ratio_list = []
+        info_gain_list = []
         for ax in axises:
-            info_gain_ratio = self._info_gain(ax, data, labels)
-            info_gain_ratio_list.append(info_gain_ratio)
+            info_gain = self._info_gain(ax, data, labels)
+            info_gain_list.append(info_gain)
         
-        if max(info_gain_ratio_list) < self.epsilon:
+        if max(info_gain_list) < self.epsilon:
             root_node.label = self._max_label(labels)
             self.leaf.append(root_node)
             return
         
-        idx = info_gain_ratio_list.index(max(info_gain_ratio_list))
+        idx = info_gain_list.index(max(info_gain_list))
         ag = axises.pop(idx)
         root_node.ax = ag
         ax_data = data[:,ag]
@@ -169,5 +171,6 @@ if __name__ == "__main__":
     model = DTree()
     print("start training")
     model.train(train_data, train_labels)
+    print("training complete")
     print("start predicting")
     model.predict(test_data, test_labels)
