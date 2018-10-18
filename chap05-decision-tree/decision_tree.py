@@ -23,7 +23,7 @@ class Node():
 
     def __init__(self):
         self.label = None 
-        self.children = [] # list of child node
+        self.children = {} # dict of ax val and child node
         self.parent = None
         self.ax = None # decision feature on the node
 
@@ -59,7 +59,7 @@ class DTree():
         d_times = np.array(d_times) 
         d_ent = []
         for i in ax_val:
-            idx = np.argwhere(ax_data == i)
+            idx = np.argwhere(ax_data == i).flatten()
             temp = labels[idx]
             temp_ent = self._emp_entropy(temp)
             d_ent.append(temp_ent)
@@ -85,6 +85,7 @@ class DTree():
     def _info_gain_ratio(self, ax, data, labels):
         hd = self._emp_entropy(labels)
         had, hda = self._cond_entropy(ax, data, labels)
+        assert had != 0
         info = (hd - hda) / had
         return info
 
@@ -93,7 +94,7 @@ class DTree():
         times = []
         for i in val:
             temp = labels[labels == i].size
-            times.append
+            times.append(temp)
         idx = times.index(max(times))
         return val[idx]
 
@@ -111,7 +112,7 @@ class DTree():
 
         info_gain_ratio_list = []
         for ax in axises:
-            info_gain_ratio = self._info_gain_ratio(ax, data, labels)
+            info_gain_ratio = self._info_gain(ax, data, labels)
             info_gain_ratio_list.append(info_gain_ratio)
         
         if max(info_gain_ratio_list) < self.epsilon:
@@ -124,16 +125,17 @@ class DTree():
         root_node.ax = ag
         ax_data = data[:,ag]
         ax_val = set(ax_data)
-        idx_d = []
         for ax in ax_val:
-            temp_idx = np.argwhere(ax_data == ax)
+            temp_idx = np.argwhere(ax_data == ax).flatten()
             child_node = Node()
             child_node.parent = root_node
-            root_node.children.append([ax, child_node])
-            child_labels = labels[idx]
-            child_data = data[idx]
+            root_node.children[ax]  = child_node
+            child_labels = labels[temp_idx]
+            child_data = data[temp_idx]
            # child_node.label = self._max_label(child_labels)
-            return self._build(child_node, child_data, child_labels, axises)
+            self._build(child_node, child_data, child_labels, axises)
+
+        return
 
     def train(self, data, labels):
         ndim = data.shape[1]
@@ -143,13 +145,13 @@ class DTree():
     def predict(self, test, labels):
         counts = 0
         nevents = labels.size
-        for i in nevents:
+        for i in range(nevents):
             temp_node = self.root
             while temp_node.children:
                 ax = temp_node.ax
                 val = test[i,ax] 
-                idx = [x[0] for x in temp_node.children].index(val)
-                temp_node = temp_node.children[idx][1]
+                assert val in temp_node.children
+                temp_node = temp_node.children[val]
             if temp_node.label == labels[i]:
                 counts += 1
         accuracy = format(counts / nevents, '.5f')
@@ -167,5 +169,5 @@ if __name__ == "__main__":
     model = DTree()
     print("start training")
     model.train(train_data, train_labels)
-    print("start predictin")
+    print("start predicting")
     model.predict(test_data, test_labels)
