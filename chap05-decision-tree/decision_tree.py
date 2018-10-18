@@ -1,4 +1,4 @@
-# Here we use C4.5 algorithm with pruning
+# Here we use ID3/C4.5 algorithm with pruning
 
 import numpy as np
 import pandas as pd
@@ -143,6 +143,8 @@ class DTree():
         ndim = data.shape[1]
         axises = list(range(ndim))
         self._build(self.root, data, labels, axises)
+        leaf_num = len(self.leaf)
+        print("number of leaf is :{}".format(leaf_num))
 
     def predict(self, test, labels):
         counts = 0
