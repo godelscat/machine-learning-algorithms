@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd 
 from collections import Counter
 import sys 
-sys.path.append('../chap02-perceptron/')
+sys.path.append('../perceptron/')
 
 from perceptron import train_split
 from kdTree import KDTree

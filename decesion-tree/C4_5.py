@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import sys
-sys.path.append('../chap02-perceptron/')
+sys.path.append('../perceptron/')
 
 from perceptron import train_split
 
