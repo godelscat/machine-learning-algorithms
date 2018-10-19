@@ -1,5 +1,7 @@
 # CART algorithm : classification tree
-# final accuracy is about 20%, too low!
+# final accuracy is about 80%
+# sklearn.tree.DecisionTreeClassifier accuracy is about 85%
+# need pruning
 
 import numpy as np
 import pandas as pd 
@@ -31,7 +33,7 @@ class Node():
 
 class DTree():
 
-    def __init__(self, epsilon=0.1, limits=100):
+    def __init__(self, epsilon=0.15, limits=100):
         self.root = Node()
         self.epsilon = epsilon
         self.limits = limits
@@ -66,31 +68,25 @@ class DTree():
 
     def _build(self, root_node, data, labels, axises):
 
-        label_val = list(set(labels))
-        if len(label_val) == 1: 
-            root_node.label = label_val[0]
-            return 
-
         if not axises:
             root_node.label = self._max_label(labels)
             return
     
-        """
+        # if # of samples smaller than limits, stop
         if labels.size < self.limits:
             root_node.label = self._max_label(labels)
             return 
-        """
 
-        """
+        # if gini index of given samples smaller than epsilon, stop
+        # which means samples almost belong to the same class
         g_data = self._gini(labels)
         if g_data < self.epsilon:
             root_node.label = self._max_label(labels)
             return 
-        """        
 
-        min_gini = 1  # gini <= 1
-        ax = 0  
-        ax_val = 0
+        min_gini = np.Inf  # gini <= 1
+        ax = None  
+        ax_val = None 
         for i in axises:
             ax_data = data[:,i]
             val = set(ax_data)
@@ -114,11 +110,13 @@ class DTree():
         root_node.right = RNode
         root_node.ax = ax
         root_node.ax_val = ax_val
-        axises = axises.remove(ax)
+        axises.remove(ax)
         idx_1 = np.argwhere(data[:,ax] == ax_val).flatten()
         idx_2 = np.argwhere(data[:,ax] != ax_val).flatten()
-        self._build(LNode, data[idx_1], labels[idx_1], axises) 
-        self._build(RNode, data[idx_2], labels[idx_2], axises) 
+        if idx_1.size != 0:
+            self._build(LNode, data[idx_1], labels[idx_1], axises) 
+        if idx_2.size != 0:
+            self._build(RNode, data[idx_2], labels[idx_2], axises) 
         return
 
     def train(self, data, labels):
