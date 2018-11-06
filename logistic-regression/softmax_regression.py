@@ -3,13 +3,14 @@
 import numpy as np
 import pandas as pd
 import sys
+import math
 sys.path.append('../perceptron/')
 
 from perceptron import train_split
 
 class Softmax:
 
-    def __init__(self, learning_rate=0.001, num_of_class=10):
+    def __init__(self, learning_rate=0.0001, num_of_class=10):
         self.learning_rate = learning_rate
         self.num_of_iter = 100000
         self.weight_decay = 0.01
@@ -49,24 +50,25 @@ class Softmax:
 
 	# update
         for n in range(self.num_of_iter):
-	    idx = np.random.randint(0, nsamples)
+            idx = np.random.randint(0, nsamples) 
             for j in range(self.num_of_class):
                 delta_wj, delta_bj = self._gradient(data[idx], labels[idx], j)
-    		self.weights[j] = self.weights[j] - self.learning_rate * delta_wj
-    		self.bias[j] = self.bias[j] - self.learning_rate * delta_bj
+                self.weights[j] -= self.learning_rate * delta_wj
+                self.bias[j] -= self.learning_rate * delta_bj
 
     def predict(self, test, labels):
         nsamples = test.shape[0]
         ndim = test.shape[1]
         counts = 0
         for i in range(nsamples):
-	    p_list = []
+            p_list = []
             for j in range(self.num_of_class):
                 p = self._probability(test[i], j)
                 p_list.append(p)
             idx = p_list.index(max(p_list))
             if idx == labels[i]:
                 counts += 1
+
         accuracy = format(counts / nsamples, '.5f')
         print("Model accuracy is : {} ".format(accuracy))
 
