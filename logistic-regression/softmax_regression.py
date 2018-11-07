@@ -10,10 +10,10 @@ from perceptron import train_split
 
 class Softmax:
 
-    def __init__(self, learning_rate=0.0001, num_of_class=10):
+    def __init__(self, learning_rate=0.000001, num_of_class=10):
         self.learning_rate = learning_rate
-        self.num_of_iter = 100000
-        self.weight_decay = 0.01
+        self.num_of_iter = 1
+        self.lam = 0.01
         self.num_of_class = num_of_class
         self.weights = None
         self.bias = None
@@ -26,6 +26,7 @@ class Softmax:
         norm = np.sum(np.exp(inner_product))
         # calculate exp(wj*xi)
         numerator = np.exp(np.sum(self.weights[j]*xi) + self.bias[j])
+        print(numerator)
         return numerator / norm
         
 
@@ -34,8 +35,8 @@ class Softmax:
     def _gradient(self, xi, yi, j):
         ins = 1 if yi == j else 0
         p = self._probability(xi, j)
-        delta_wj = - xi * (ins - p) + self.weight_decay * self.weights[j]
-        delta_bj = - (ins - p) + self.weight_decay * self.bias[j] 
+        delta_wj = - xi * (ins - p) + self.lam * self.weights[j]
+        delta_bj = - (ins - p) + self.lam * self.bias[j] 
         return delta_wj, delta_bj
 
     def train(self, data, labels):
