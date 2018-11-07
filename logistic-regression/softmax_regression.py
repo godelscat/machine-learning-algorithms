@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import sys
+import time
 sys.path.append('../perceptron/')
 
 from perceptron import train_split
@@ -15,15 +16,14 @@ class Softmax:
         self.lam = 0.01
         self.num_of_class = num_of_class
         self.weights = None
-        self.bias = None
 
     # probability of p(y=j|x=xi) = exp(wi*xi + bi) / norm
     def _probability(self, xi, j):
         # exp(wj*xi + bj) 
-        numerator = np.exp(np.dot(self.weights[j], xi) + self.bias[j])
+        numerator = np.exp(np.dot(self.weights[j], xi))
         
         # denominator sum of exp(wj*xi + bj) over j
-        inner_product = np.sum(self.weights*xi, axis=1) + self.bias
+        inner_product = np.sum(self.weights*xi, axis=1)
         denominator = np.sum(np.exp(inner_product))
         return  numerator / denominator
 
@@ -33,23 +33,23 @@ class Softmax:
         ins = 1 if yi == j else 0
         p = self._probability(xi, j)
         delta_wj = - xi * (ins - p) + self.lam * self.weights[j]
-        delta_bj = - (ins - p) + self.lam * self.bias[j] 
-        return delta_wj, delta_bj
+        return delta_wj
 
     def train(self, data, labels):
         nsamples = data.shape[0]
         ndim = data.shape[1]
         # initialize weight and bias
-        self.weights = np.zeros((self.num_of_class, ndim))
-        self.bias = np.zeros((self.num_of_class))
+        # it turns out combining weight and bias together works faster
+        self.weights = np.zeros((self.num_of_class, ndim+1))
 
 	# update
         for n in range(self.num_of_iter):
             idx = np.random.randint(0, nsamples) 
+            xi = np.append(data[idx], 1.0)
+            yi = labels[idx]
             for j in range(self.num_of_class):
-                delta_wj, delta_bj = self._gradient(data[idx], labels[idx], j)
+                delta_wj = self._gradient(xi, yi, j)
                 self.weights[j] -= self.learning_rate * delta_wj
-                self.bias[j] -= self.learning_rate * delta_bj
 
     def predict(self, test, labels):
         nsamples = test.shape[0]
@@ -57,8 +57,9 @@ class Softmax:
         counts = 0
         for i in range(nsamples):
             p_list = []
+            xi = np.append(test[i], 1.0)
             for j in range(self.num_of_class):
-                p = self._probability(test[i], j)
+                p = self._probability(xi, j)
                 # p = np.dot(self.weights[j], test[i]) + self.bias[j]
                 p_list.append(p)
             idx = p_list.index(max(p_list))
@@ -78,6 +79,9 @@ if __name__ == "__main__" :
 
     model =  Softmax()
     print("start training")
+    start = time.time()
     model.train(train_data, train_labels)
+    end = time.time()
+    print("training cost : {}s".format(end - start))
     print("start predicting")
     model.predict(test_data, test_labels)
