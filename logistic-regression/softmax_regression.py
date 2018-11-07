@@ -4,28 +4,33 @@ import numpy as np
 import pandas as pd
 import sys
 import time
+from scipy.special import logsumexp
 sys.path.append('../perceptron/')
 
 from perceptron import train_split
 
 class Softmax:
 
-    def __init__(self, learning_rate=0.000001, num_of_class=10):
+    def __init__(self, learning_rate=0.0001):
         self.learning_rate = learning_rate
         self.num_of_iter = 100000
         self.lam = 0.01
-        self.num_of_class = num_of_class
+        self.num_of_class = 10 
         self.weights = None
 
     # probability of p(y=j|x=xi) = exp(wi*xi + bi) / norm
     def _probability(self, xi, j):
         # exp(wj*xi + bj) 
-        numerator = np.exp(np.dot(self.weights[j], xi))
+        # numerator = np.exp(np.dot(self.weights[j], xi))
         
         # denominator sum of exp(wj*xi + bj) over j
-        inner_product = np.sum(self.weights*xi, axis=1)
-        denominator = np.sum(np.exp(inner_product))
-        return  numerator / denominator
+        # inner_product = np.sum(self.weights*xi, axis=1)
+        # denominator = np.sum(np.exp(inner_product))
+        # in order to avoid overflow, we need to do some transfrom of p(y=j|x=xi)
+        reduce_weights = self.weights - self.weights[j]
+        inner_product = np.sum(reduce_weights * xi, axis=1)
+        norm = np.exp(logsumexp(inner_product))
+        return  1 / norm 
 
     # gradient with respect to wj, randomly pick in xi direction
     # w is K by N array, b is K vector
@@ -38,9 +43,11 @@ class Softmax:
     def train(self, data, labels):
         nsamples = data.shape[0]
         ndim = data.shape[1]
+        self.num_of_class = len(set(labels))
         # initialize weight and bias
         # it turns out combining weight and bias together works faster
-        self.weights = np.zeros((self.num_of_class, ndim+1))
+        # self.weights = np.zeros((self.num_of_class, ndim+1))
+        self.weights = np.random.uniform(size=(self.num_of_class, ndim+1))
 
 	# update
         for n in range(self.num_of_iter):
