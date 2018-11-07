@@ -32,10 +32,7 @@ class Softmax:
     # gradient with respect to wj, randomly pick in xi direction
     # w is K by N array, b is K vector
     def _gradient(self, xi, yi, j):
-        if yi == j:
-            ins = 1
-        else:
-            ins = 0
+        ins = 1 if yi == j else 0
         p = self._probability(xi, j)
         delta_wj = - xi * (ins - p) + self.weight_decay * self.weights[j]
         delta_bj = - (ins - p) + self.weight_decay * self.bias[j] 
