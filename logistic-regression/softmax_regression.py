@@ -1,5 +1,7 @@
 # softmax regression : multi-nominal logistic regression
 # ref: http://ufldl.stanford.edu/wiki/index.php/Softmax%E5%9B%9E%E5%BD%92
+# in order to be stable in different kinds of kernal initializer, 
+# I did some transform of equation p(y=j|x=xi)
 import numpy as np
 import pandas as pd
 import sys
@@ -29,7 +31,9 @@ class Softmax:
         # in order to avoid overflow, we need to do some transfrom of p(y=j|x=xi)
         reduce_weights = self.weights - self.weights[j]
         inner_product = np.sum(reduce_weights * xi, axis=1)
-        norm = np.exp(logsumexp(inner_product))
+        # norm = np.exp(logsumexp(inner_product))
+        # logsumexp costs a lot
+        norm = np.sum(np.exp(inner_product))
         return  1 / norm 
 
     # gradient with respect to wj, randomly pick in xi direction
@@ -46,7 +50,7 @@ class Softmax:
         self.num_of_class = len(set(labels))
         # initialize weight and bias
         # it turns out combining weight and bias together works faster
-        # self.weights = np.zeros((self.num_of_class, ndim+1))
+        # You can use different initializer here
         self.weights = np.random.uniform(size=(self.num_of_class, ndim+1))
 
 	# update
@@ -67,7 +71,6 @@ class Softmax:
             xi = np.append(test[i], 1.0)
             for j in range(self.num_of_class):
                 p = self._probability(xi, j)
-                # p = np.dot(self.weights[j], test[i]) + self.bias[j]
                 p_list.append(p)
             idx = p_list.index(max(p_list))
             if idx == labels[i]:
