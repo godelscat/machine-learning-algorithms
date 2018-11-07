@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import sys
-import math
 sys.path.append('../perceptron/')
 
 from perceptron import train_split
@@ -12,7 +11,7 @@ class Softmax:
 
     def __init__(self, learning_rate=0.000001, num_of_class=10):
         self.learning_rate = learning_rate
-        self.num_of_iter = 1
+        self.num_of_iter = 100000
         self.lam = 0.01
         self.num_of_class = num_of_class
         self.weights = None
@@ -20,15 +19,13 @@ class Softmax:
 
     # probability of p(y=j|x=xi) = exp(wi*xi + bi) / norm
     def _probability(self, xi, j):
-        # inner product of wi xi
-        inner_product = np.sum(self.weights*xi, axis=1) + self.bias
-	# calculate sum_{1,K} exp(w*xi)
-        norm = np.sum(np.exp(inner_product))
-        # calculate exp(wj*xi)
-        numerator = np.exp(np.sum(self.weights[j]*xi) + self.bias[j])
-        print(numerator)
-        return numerator / norm
+        # exp(wj*xi + bj) 
+        numerator = np.exp(np.dot(self.weights[j], xi) + self.bias[j])
         
+        # denominator sum of exp(wj*xi + bj) over j
+        inner_product = np.sum(self.weights*xi, axis=1) + self.bias
+        denominator = np.sum(np.exp(inner_product))
+        return  numerator / denominator
 
     # gradient with respect to wj, randomly pick in xi direction
     # w is K by N array, b is K vector
@@ -43,8 +40,8 @@ class Softmax:
         nsamples = data.shape[0]
         ndim = data.shape[1]
         # initialize weight and bias
-        self.weights = np.random.uniform(size=(self.num_of_class, ndim))
-        self.bias = np.random.uniform(size=(self.num_of_class))
+        self.weights = np.zeros((self.num_of_class, ndim))
+        self.bias = np.zeros((self.num_of_class))
 
 	# update
         for n in range(self.num_of_iter):
@@ -62,6 +59,7 @@ class Softmax:
             p_list = []
             for j in range(self.num_of_class):
                 p = self._probability(test[i], j)
+                # p = np.dot(self.weights[j], test[i]) + self.bias[j]
                 p_list.append(p)
             idx = p_list.index(max(p_list))
             if idx == labels[i]:
