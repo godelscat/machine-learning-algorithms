@@ -52,6 +52,7 @@ class Softmax:
         # it turns out combining weight and bias together works faster
         # You can use different initializer here
         self.weights = np.random.uniform(size=(self.num_of_class, ndim+1))
+        #self.weights = np.zeros((self.num_of_class, ndim+1))
 
 	# update
         for n in range(self.num_of_iter):
@@ -67,11 +68,8 @@ class Softmax:
         ndim = test.shape[1]
         counts = 0
         for i in range(nsamples):
-            p_list = []
             xi = np.append(test[i], 1.0)
-            for j in range(self.num_of_class):
-                p = self._probability(xi, j)
-                p_list.append(p)
+            p_list = [self._probability(xi, j) for j in range(self.num_of_class)]
             idx = p_list.index(max(p_list))
             if idx == labels[i]:
                 counts += 1
