@@ -114,7 +114,7 @@ class SVM:
 
 if __name__ == "__main__":
 	
-	raw_data = pd.read_csv("../dataset/MNIST/train.csv")
+	raw_data = pd.read_csv("../dataset/MNIST/binary_train.csv")
 	labels = raw_data['label'].value
 	data = raw_data.iloc[:,1:].values
 	train_data, train_labels, test_data, test_labels = train_split(data, labels)
