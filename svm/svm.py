@@ -1,3 +1,4 @@
+# ref of KKT: http://liuhongjiang.github.io/tech/blog/2012/12/28/svm-smo/
 # I use a slightly simply way to select the two alphas
 # Final accuracy is around 95%, and takes about 2m48s in my computer
 import numpy as np
