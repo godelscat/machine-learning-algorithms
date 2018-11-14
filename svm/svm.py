@@ -1,4 +1,5 @@
-# ref: http://liuhongjiang.github.io/tech/blog/2012/12/28/svm-smo/
+# I use a slightly simply way to select the two alphas
+# Final accuracy is around 95%, and takes about 2m48s in my computer
 import numpy as np
 import pandas as pd
 import sys
@@ -9,8 +10,8 @@ from perceptron import train_split
 class SVM:
 
 	def __init__(self):
-		self.maxIter = 1000
-		self.epsilon = 0.0001 
+		self.maxIter = 10000
+		self.epsilon = 0.001 
 		self.E = None # Eq(7.105) Ei
 		self.kernel = None # linear kernel function
 		self.b = 0 # bias b
@@ -39,13 +40,15 @@ class SVM:
 
 	def _sign_func(self, train_data, train_labels, test_data):
 		bigMax = np.sum(test_data * train_data, axis=1) 
-		func = np.sum(self.alpha * train_labels * bigMatrix) + self.b	
+		func = np.sum(self.alpha * train_labels * bigMax) + self.b	
 		result = 1 if func >=0 else -1 
 		return result
 
 	def train(self, data, labels):
 		ndim = labels.size
 		self.alpha = np.zeros((ndim))
+		self._get_kernel(data)
+		self._get_E(labels)
 		for k in range(self.maxIter):
 			flag = True
 			for i in range(ndim):
@@ -57,12 +60,16 @@ class SVM:
 						j  = np.argmin(self.E)
 					else:
 						j  = np.argmax(self.E)
+
+					if j == i : 
+						continue
+
 					alpha2 = self.alpha[j]
 					E2 = self.E[j]
-					y2 = self.labels[j]
+					y2 = labels[j]
 
 					eta = self.kernel[i,i] + self.kernel[j,j] - 2 * self.kernel[i,j]
-					alpha2_unc = alpha2 + y2 * (E2 - E1) / eta
+					alpha2_unc = alpha2 + y2 * (E1 - E2) / eta
 					if y1 == y2:
 						L = max([0, alpha2 + alpha1 - self.C])
 						H = min([self.C, alpha2 + alpha1])
@@ -77,13 +84,14 @@ class SVM:
 						alpha2_new = L
 					alpha1_new = alpha1 + y1 * y2 * (alpha2 - alpha2_new)
 
-					# following above ref, see if decline enough for alpha2_new 
-					if abs(alpha2_new - alpha2) < 0.001:
-						continue
-					
 					# cal Eq(7.115) and Eq(7.116)
 					b1_new = -E1 - y1 * self.kernel[i,i] * (alpha1_new - alpha1) - y2 * self.kernel[i,j] * (alpha2_new - alpha2) + self.b
 					b2_new = -E2 - y1 * self.kernel[i,j] * (alpha1_new - alpha1) - y2 * self.kernel[j,j] * (alpha2_new - alpha2) + self.b
+
+					# update alpha
+					self.alpha[i] = alpha1_new
+					self.alpha[j] = alpha2_new
+
 					if alpha1_new > 0 and alpha1_new < self.C:
 						self.b = b1_new
 					elif alpha2_new > 0 and alpha2_new < self.C:
@@ -96,13 +104,13 @@ class SVM:
 					self.E[j] = self._get_gi(labels, j) - y2
 
 					flag = False
-
+					break
 			# if KKT is satisfied, then stop
 			if flag:
 				break
 
 	def predict(self, train_data, train_labels, test_data, test_labels):
-		ndim = labels.size
+		ndim = test_labels.size
 		counts = 0
 		for i in range(ndim):
 			result = self._sign_func(train_data, train_labels, test_data[i])
@@ -115,7 +123,7 @@ class SVM:
 if __name__ == "__main__":
 	
 	raw_data = pd.read_csv("../dataset/MNIST/binary_train.csv")
-	labels = raw_data['label'].value
+	labels = raw_data['label'].values
 	data = raw_data.iloc[:,1:].values
 	train_data, train_labels, test_data, test_labels = train_split(data, labels)
 
