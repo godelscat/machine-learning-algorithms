@@ -1,5 +1,5 @@
-# Following WenDesi/lihang_book_algorithm, we use MNIST dataset
-# However, here we label odd number -1, even number +1
+# Following repo WenDesi/lihang_book_algorithm, we use MNIST dataset
+# However, here we only pick 0 and 1s, label as -1 and +1 
 import numpy as np
 import pandas as pd
 
@@ -19,11 +19,10 @@ def train_split(data, labels, train_ratio=0.3):
 	
 class Perceptron():
 
-	def __init__(self, eta=0.00001):
+	def __init__(self, eta=0.0001):
 		self.learning_rate = eta 
 
 	def train(self, data, labels):
-		assert data[:,0].size == labels.size
 		nevents = labels.size
 		# initialize w and b to 0
 		weight = np.zeros(data[0,:].size)
@@ -31,16 +30,13 @@ class Perceptron():
 
 		runtime = 10000
 		run = 0
-		while True:
+		for i in range(runtime):
 			idx = np.random.randint(0, nevents)
 			temp = labels[idx] * (np.dot(weight, data[idx,:]) + bias)
 			if temp <= 0 :
 				weight = weight + self.learning_rate * labels[idx] * data[idx, :]
 				bias = bias + self.learning_rate * labels[idx]	
 				run += 1
-			if run >= runtime:
-				print("up to max runtime")
-				break
 
 		# for small dataset, we can check all the elements
 		"""
@@ -65,7 +61,6 @@ class Perceptron():
 		return weight, bias
 
 	def predict(self, test, labels, weight, bias):
-		assert test[:,0].size == labels.size
 		events = labels.size
 		correct_label = 0
 		for i in range(events):
