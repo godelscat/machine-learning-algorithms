@@ -2,7 +2,7 @@
 
 This is my note on *Machine Learning Algorithms* based on the two books in the reference. 
 
-Handwritten notes are in Chinese, I'll try to write more formal notes in the future (I'm just kidding). The algorithms are implented by `python` with plain `numpy`, and `pandas` to read data. Unless otherwise specified, *Eq(XXX)* in comments are from Book ref 1.
+Handwritten notes are in Chinese, I'll try to write more formal notes in the future (just kidding). The algorithms are implented by `python` with plain `numpy`, and `pandas` to read data. Unless otherwise specified, *Eq(XXX)* in comments are from Book ref 1.
 
 BTW, this repo is just for understanding of these basic machine learning algorithms. If you want to use them in real life, please go for `sklearn`, which usually works much better.
 
