@@ -73,16 +73,16 @@ class AdaBoost:
                 temp_gini = self._cond_gini(d_size, d1_labels, d2_labels)
                 if temp_gini < min_gini:
                     min_gini = temp_gini
-                    ax = i
-                    ax_val = j
-                    la1_label = d1_labels
+                    ax = i # split feature
+                    ax_val = j # value of split feature
+                    la1_label = d1_labels 
                     la2_label = d2_labels
                     idx_left = idx_1
                     idx_right = idx_2
 
-        la1 = self._max_label(la1_label)
-        la2 = self._max_label(la2_label)
-        predict[idx_left] = la1
+        la1 = self._max_label(la1_label) # label of subdata(== ax_val)
+        la2 = self._max_label(la2_label) # label of subdata(!= ax_val)
+        predict[idx_left] = la1 # predict value
         predict[idx_right] = la2
         return ax, ax_val, la1, la2, predict
 
@@ -111,7 +111,6 @@ class AdaBoost:
             ax, ax_val, la1, la2, predict = self._feature(data, labels)
             self.base.append((ax, ax_val, la1, la2))
             em = self._cal_E(predict, labels)
-            assert em != 0
             alpham = 0.5 * np.log((1-em) / em)
             self.alpha.append(alpham)
             zm = self._cal_Z(predict, labels, m)
