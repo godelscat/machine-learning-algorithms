@@ -1,14 +1,13 @@
 import numpy as np 
 import pandas as pd 
+from tensorflow as tf
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
 from TwoLayer import TwoLayer
 import matplotlib.pyplot as plt
 
 raw_data = pd.read_csv("../dataset/MNIST/binary_train.csv")
-labels = raw_data['label'].values
 data = raw_data.iloc[:,1:].values
-OneHotEncoder().fit_transform(labels.reshape(-1,1))
+labels = tf.keras.utils.to_categorical(raw_data["label"])
 
 x_train, x_test, t_train, t_test = train_test_split(data, labels)
 train_size = x_train.shape[0]
