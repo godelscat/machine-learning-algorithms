@@ -1,11 +1,11 @@
 import numpy as np 
 import pandas as pd 
-from tensorflow as tf
+import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from TwoLayer import TwoLayer
 import matplotlib.pyplot as plt
 
-raw_data = pd.read_csv("../dataset/MNIST/binary_train.csv")
+raw_data = pd.read_csv("../dataset/MNIST/train.csv")
 data = raw_data.iloc[:,1:].values
 labels = tf.keras.utils.to_categorical(raw_data["label"])
 
