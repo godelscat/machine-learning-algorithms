@@ -41,7 +41,7 @@ class KMeans:
         # start iter
         for i in range(self.max_iter):
             Clusters = [None] * self.n_clusters
-            distance = np.array([])
+            distance = np.empty(shape=(0, nsample), dtype=int)
             for k in range(self.n_clusters):
                 temp = (data - mean_vec[k]) ** 2
                 temp = np.sqrt(np.sum(temp, axis=1)) # cal distance
@@ -63,7 +63,17 @@ if __name__ == "__main__":
     raw_data = pd.read_csv('../dataset/MNIST/train.csv')
     labels = raw_data['label'].values
     data = raw_data.iloc[:,1:].values
+    '''
     kmeans = KMeans(n_clusters=10)
     kmeans.train(data)
-    score = accuracy_score(labels, kmeans.labels_)
-    print("k-means clustering accuracy is : ".format(score))
+    '''
+    '''
+    from sklearn import cluster
+    kmeans = cluster.KMeans(n_clusters=10)
+    kmeans.fit(data)
+    real_cluster = [np.sum(labels == k) for k in range(10)]
+    pred_cluster = [np.sum(kmeans.labels_ == k ) for k in range(10)]
+    print(real_cluster)
+    print('-'*10)
+    print(pred_cluster)
+    '''
