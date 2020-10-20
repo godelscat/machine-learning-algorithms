@@ -59,7 +59,7 @@ class AttentionHead(nn.Module):
         self.d_k = d_k
         self.q_linear = nn.Linear(d_model, d_k)
         self.k_linear = nn.Linear(d_model, d_k)
-        self.v_linear = nn.Linear(d_model, d_v)
+        self.v_linear = nn.Linear(d_model, d_k)
         self.attn = ScaledDotAttention(dropout)
 
     def forward(self, q, k, v, mask=None):
